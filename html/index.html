@@ -1,0 +1,106 @@
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Sharing Site</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="index.html" class="logo">Set Sharing Site</a>
+        </div>
+        
+        <div class="search-container">
+            <form id="searchForm">
+                <input type="text" class="search-input" placeholder="Search Data Sets..." id="searchInput">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        
+        <div class="user-menu">
+            <div class="user-avatar" id="userAvatar"></div>
+            <div class="user-dropdown" id="userDropdown">
+                <ul class="dropdown-menu">
+                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='admin_profile.html'">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" onclick="window.location.href='edit_account.html'">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Modify Account</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Log Out</span>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-container">
+        <!-- Barra lateral -->
+        <aside class="sidebar">
+            <nav class="side-menu">
+                <a href="index.html" class="menu-item active">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="admin_dataset_list.html" class="menu-item">
+                    <i class="fas fa-book"></i> My Data Sets
+                </a>
+                
+                <!-- Opción SOLO para admin -->
+                <a href="approve_dataset.html" class="menu-item" id="manageCoursesItem">
+                    <i class="fas fa-chalkboard-teacher"></i> Approve Data Sets
+                </a>
+                
+                <a href="create_dataset.html" class="menu-item">
+                    <i class="fas fa-plus-circle"></i> Create Data Set
+                </a>
+                <a href="users_list.html" class="menu-item">
+                    <i class="fas fa-users"></i> Users
+                </a>
+            </nav>
+        </aside>
+        
+     
+        <!-- Contenido principal -->
+        <main class="content">
+            <h1 class="content-title">Explore Data Sets</h1>
+
+            <div class="friends-list">
+                <!-- Tarjeta de DataSet -->
+                <div class="friend-card" style="display:flex; align-items:center; gap:16px;">
+                <!-- Imagen tipo avatar -->
+                <div class="friend-avatar">
+                        <img src="" alt="María González">
+                    </div>
+
+                <!-- Info -->
+                <div class="course-info" style="flex:1;">
+                    <h3 class="course-title">DataSet Name</h3>
+                </div>
+
+                <!-- Botones -->
+                <div class="action-buttons" style="display:flex; gap:8px;">
+                    <button onclick="window.location.href='dataset_preview.html'" class="btn btn-primary">
+                    <i class="fas fa-database"></i> See
+                    </button>
+                </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Set Sharing Site</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="index.html" class="logo">Set Sharing Site</a>
+        </div>
+        
+        
+       <div class="user-menu">
+            <div class="user-avatar" id="userAvatar"></div>
+            <div class="user-dropdown" id="userDropdown">
+                <ul class="dropdown-menu">
+                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='admin_profile.html'">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" onclick="window.location.href='edit_account.html'">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Modify Account</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Log Out</span>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <!-- Botón de Atrás -->
+    <div class="back-container">
+        <button class="back-button" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+    </div>
+    
+    <div class="main-container">        
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Encabezado del perfil -->
+            <div class="profile-header">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Foto de perfil" class="profile-avatar">
+                
+                <div class="profile-info">
+                    <h1 class="profile-name">María González</h1>
+                    <p class="profile-username">@m_gonzalez</p>
+                    
+                    <form id="add_friend">
+                    <div class="profile-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-share-alt"></i> Follow
+                        </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i onclick="window.location.href='message.html'" class="fas fa-comment-dots"></i> Message
+                        </button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sección de datasets creados -->
+            <div class="courses-section">
+                <h2 class="section-title">Owned Data Sets</h2>
+                
+                <div class="courses-list">
+                    <!-- Curso 1 -->
+                    <div class="course-card">
+                        <h3 class="course-title">DATASET1</h3>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            <!-- Sección de cursos matriculados -->
+            <div class="courses-section">
+                <h2 class="section-title">Downloaded Data Sets</h2>
+                
+                <div class="courses-list">
+                    <!-- Curso 1 -->
+                    <div class="course-card">
+                        <h3 class="course-title">DATASET2</h3>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+        </main>
+    </div>
+    <script ></script>
+</body>
+</html>

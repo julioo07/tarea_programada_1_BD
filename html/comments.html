@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Set Sharing Site</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="index.html" class="logo">Set Sharing Site</a>
+        </div>
+        
+        <div class="search-container">
+            <form id="searchForm">
+                <input type="text" class="search-input" placeholder="Search Users..." id="searchInput">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        
+        <div class="user-menu">
+            <div class="user-avatar" id="userAvatar"></div>
+            <div class="user-dropdown" id="userDropdown">
+                <ul class="dropdown-menu">
+                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='admin_profile.html'">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" onclick="window.location.href='edit_account.html'">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Modify Account</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Log Out</span>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Botón de Atrás -->
+    <div class="back-container">
+        <button class="back-button" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+    </div>
+    
+    <div class="main-container">        
+        <!-- Contenido principal -->
+        <div class="content">
+            <h2 class="section-title" id="comments-title">Comments</h2>
+
+            <div class="course-content">
+                <!-- Lista de comentarios -->
+                <div class="comments-list" aria-live="polite">
+
+                <!-- Ejemplo de comentario -->
+                <div class="comment-item" style="display:flex; gap:12px; padding:12px 0; border-bottom:1px solid #eee;">
+                <div class="comment-avatar" style="width:40px; height:40px; border-radius:50%; background:#e9e9e9;"></div>
+
+                <div class="comment-body" style="flex:1;">
+                    <div class="comment-meta" style="font-size:13px; color:#666; margin-bottom:4px;">
+                    <strong>María González</strong> · 24/09/2025
+                    </div>
+
+                    <div class="comment-text">
+                    ¡Excelente DataSet! Me sirvió para probar modelos de clasificación.
+                    </div>
+                </div>
+
+                <div class="action-buttons" style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-outline" onclick="toggleReply(this)">
+                    <i class="fas fa-reply"></i> Responder
+                    </button>
+                    <button onclick="window.location.href='see_dataset.html'" class="btn btn-delete">
+                    <i class="fas fa-database"></i> Delete
+                    </button>
+                </div>
+                </div>
+
+                <!-- Formulario para comentar -->
+                <form class="comment-form" style="margin-top:16px;">
+                    <label for="commentText" class="form-label" style="display:block; margin-bottom:6px;">Escribe un comentario</label>
+                    <textarea id="commentText" class="form-input" rows="3" placeholder="Añade tu comentario..."></textarea>
+                    <div class="action-buttons" style="margin-top:8px; display:flex; gap:8px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Publicar
+                    </button> 
+                    </div>
+                </form>
+                </div>
+
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

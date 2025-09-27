@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Set Sharing Site</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="index.html" class="logo">Set Sharing Site</a>
+        </div>
+        
+        <div class="search-container">
+            <form id="searchForm">
+                <input type="text" class="search-input" placeholder="Search Users..." id="searchInput">
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        
+        <div class="user-menu">
+            <div class="user-avatar" id="userAvatar"></div>
+            <div class="user-dropdown" id="userDropdown">
+                <ul class="dropdown-menu">
+                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='admin_profile.html'">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" onclick="window.location.href='edit_account.html'">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Modify Account</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Log Out</span>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Botón de Atrás -->
+    <div class="back-container">
+        <button class="back-button" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+    </div>
+    
+    <div class="main-container">        
+        <!-- Contenido principal -->
+        <main class="content">
+            <h1 class="content-title">Descargas del dataset</h1>
+            <div class="downloads-summary" aria-live="polite">
+                Total de descargas:
+                <span class="badge"><span id="downloadsCount">0</span></span>
+            </div>
+
+            <div class="friends-list">
+                <!-- Amigo 1 -->
+                <div class="friend-card">
+                    <div class="friend-avatar">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="María González">
+                    </div>
+                    <div class="friend-info">
+                        <div class="friend-name">María González</div>
+                    </div>
+                    <form id="add_friend">
+                    <div class="action-buttons">
+                        <button onclick="window.location.href='profile.html'" class="btn btn-primary">
+                            <i></i> Profile
+                        </button>
+                        
+                        <button type="submit" class="btn btn-outline">
+                            Follow
+                        </button>
+                        
+                    </div>
+                    </form>
+                </div>  
+            </div>
+        </main>
+    </div>
+    <script type="module">//src="script.js"
+
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        import neo4j from 'https://cdn.jsdelivr.net/npm/neo4j-driver@5.28.1/lib/browser/neo4j-web.esm.js'
+
+        
+        // Configuramos la interfaz según el tipo de usuario
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mostrar avatar de usuario
+            document.getElementById('userAvatar').textContent = currentUser.avatarInitials;
+            
+            // Configurar información del dropdown
+            document.getElementById('dropdownUserName').textContent = currentUser.name;
+            document.getElementById('dropdownUserRole').textContent = 
+                currentUser.role === 'teacher' ? 'Docente' : 'Estudiante';
+            
+            // Menú desplegable de usuario
+            const userAvatar = document.getElementById('userAvatar');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            userAvatar.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Cerrar el menú al hacer clic fuera
+            document.addEventListener('click', function() {
+                userDropdown.classList.remove('show');
+            });
+            
+            // Evitar que el menú se cierre al hacer clic dentro
+            userDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Función de cerrar sesión
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if(confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                    alert('Sesión cerrada - Redirigiendo al login...');
+                    // window.location.href = 'login.html';
+                }
+            });
+            
+            // Función de búsqueda
+            document.getElementById('searchForm').addEventListener('click', function(e) {
+                e.preventDefault();
+                const searchTerm = document.getElementById('searchInput').value.trim();
+                if(searchTerm) {
+                    alert(`Búsqueda realizada: "${searchTerm}" (esto es una simulación)`);
+                }
+            });
+        });
+
+        document.getElementById('add_friend').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            //agrega un amigo
+
+
+            const friendUser = "Juan Docente";//cambiar por el nombre de usuario del amigo
+            await add_friend_connection(currentUser.name, friendUser);//cambiar currentuser.name por currentUser.username
+
+            alert('Amigo Añadido');
+
+        });
+
+        async function add_friend_connection(user_id, friend_id) {
+            var driver = neo4j.driver('neo4j+s://3d668cd0.databases.neo4j.io', neo4j.auth.basic('neo4j', 'gpN9T0xeJ3KyH-CpgXjYj5TO5m9sYv3vZLnp8RVhcao'));
+            await driver.executeQuery(
+            "match (a:User {id: $param1}), (b:User {id: $param2}) merge (a)-[f:friend]->(b) return b.id as name", 
+            { param1: user_id, param2: friend_id}
+            );
+            await driver.close();
+        }
+    </script>
+</body>
+</html>

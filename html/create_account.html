@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Set Sharing Site</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="index.html" class="logo">Set Sharing Site</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Contenido principal -->
+        <main class="content1">            
+            <div class="form-container">
+                <form id="signupForm">
+                    <h1 class="content-title">Create Account</h1>
+
+                    <div class="form-group">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" id="username" class="form-input" required placeholder="Ej: julio123">
+                        <div class="error-message" id="usernameError">The username is already in use</div>
+                    </div>
+                    
+                    <div class="form-group password-container">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" class="form-input" required placeholder="Mínimo 8 caracteres">
+                        <div class="error-message" id="passwordError">Invalid password</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="Name" class="form-label">Name</label>
+                        <input type="text" id="Name" class="form-input" required placeholder="Ej: Julio">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Lastname" class="form-label">Last Name</label>
+                        <input type="text" id="Lastname" class="form-input" required placeholder="Ej: Bermúdez">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="birthDate" class="form-label">Birthdate</label>
+                        <input type="date" id="birthDate" class="form-input" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userAvatar" class="form-label">Profile Picture </label>
+                        <input type="file" id="userAvatar" class="form-input" accept="image/*">
+                        <div class="image-preview" id="imagePreview">
+                            <div class="image-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Create 
+                        </button>
+                    </div>
+                    
+                    <div class="form-footer">
+                        Already have an account? <a href="login.html" class="text-link">Log In</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+      
+        import neo4j from 'https://cdn.jsdelivr.net/npm/neo4j-driver@5.28.1/lib/browser/neo4j-web.esm.js'
+        // Vista previa de la imagen de perfil
+        document.getElementById('userAvatar').addEventListener('change', function(e) {
+            const preview = document.getElementById('imagePreview');
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            
+            if (file) {
+                reader.onload = function(e) {
+                    preview.innerHTML = '<img src="' + e.target.result + '" alt="Vista previa del avatar">';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Validación y envío del formulario
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('Name').value;
+            const lastname = document.getElementById('Lastname').value;
+            const birthDate = document.getElementById('birthDate').value;
+
+            // Validación de la contraseña
+            const passwordError = document.getElementById('passwordError');
+            if (password.length < 8) {
+                passwordError.style.display = 'block';
+                return;
+            } else {
+                passwordError.style.display = 'none';
+            }
+
+            const userData = {
+                username,
+                password,
+                fullName: `${name} ${lastname}`,
+                birthDate,
+                avatar: '', 
+                role: 'student'
+            };
+
+            try {
+                const res = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    await create_user(username);
+                    window.location.href = 'login.html';
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error al registrarse:', error);
+                alert('Error en el servidor');
+            }
+          
+            
+        });
+      
+      async function create_user(user_id) {
+
+            var driver = neo4j.driver('neo4j+s://3d668cd0.databases.neo4j.io', neo4j.auth.basic('neo4j', 'gpN9T0xeJ3KyH-CpgXjYj5TO5m9sYv3vZLnp8RVhcao'));// 'bolt://localhost:7687'
+            await driver.executeQuery("merge (u:User {id: $param}) RETURN u.id AS name",
+            { param: user_id} 
+            );
+            await driver.close()
+            return 0;
+
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Nuevo Curso - Schoolify</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <!-- Barra de navegación -->
+  <nav class="navbar">
+      <div class="logo-container">
+          <a href="index.html" class="logo">Set Sharing Site</a>
+      </div>
+    
+      
+      <div class="user-menu">
+            <div class="user-avatar" id="userAvatar"></div>
+            <div class="user-dropdown" id="userDropdown">
+                <ul class="dropdown-menu">
+                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='admin_profile.html'">
+                        <i class="fas fa-user"></i>
+                        <span>My Profile</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" onclick="window.location.href='edit_account.html'">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Modify Account</span>
+                    </li>
+                    <div class="dropdown-divider"></div>
+                    <li class="dropdown-item" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Log Out</span>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+  </nav>
+
+  <div class="back-container">
+    <button class="back-button" onclick="window.history.back()">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+  </div>
+
+  <div class="main-container">
+    <!-- Contenido principal -->
+    <main class="content1">            
+        <div class="form-container">
+            <form id="datasetForm">
+                <h1 class="content-title">Create Data Set</h1>
+
+                <!-- Nombre -->
+                <div class="form-group">
+                    <label for="datasetName" class="form-label">Data Set Name</label>
+                    <input type="text" id="datasetName" class="form-input" required placeholder="Ej: Ventas_2025">
+                    <div class="error-message" id="datasetNameError">El nombre ya está en uso</div>
+                </div>
+                
+                <!-- Descripción -->
+                <div class="form-group description-container">
+                    <label for="datasetDescription" class="form-label">Description</label>
+                    <textarea id="datasetDescription" class="form-input" rows="4" required placeholder="Describe el contenido del Data Set..."></textarea>
+                </div>
+                
+                <!-- Fecha de Inclusión -->
+                <div class="form-group">
+                    <label class="form-label">Inclusion Date</label>
+                    <span id="inclusionDate" class="form-date"></span>
+                </div>
+                
+                <!-- Foto o avatar -->
+                <div class="form-group">
+                    <label for="datasetAvatar" class="form-label">Photo / Avatar</label>
+                    <input type="file" id="datasetAvatar" class="form-input" accept="image/*">
+                    <div class="image-preview" id="avatarPreview">
+                        <div class="image-placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Archivos -->
+                <div class="form-group">
+                    <label for="datasetFiles" class="form-label">Files</label>
+                    <input type="file" id="datasetFiles" class="form-input" multiple required>
+                    <small class="form-hint">Puedes subir uno o varios archivos</small>
+                </div>
+                
+                <!-- Imagen descriptiva del repositorio -->
+                <div class="form-group">
+                    <label for="repoImage" class="form-label">Repository Image</label>
+                    <input type="file" id="repoImage" class="form-input" accept="image/*">
+                    <div class="image-preview" id="repoImagePreview">
+                        <div class="image-placeholder">
+                            <i class="fas fa-database"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Videos de guía -->
+                <div class="form-group">
+                    <label for="guideVideos" class="form-label">Guide Videos</label>
+                    <input type="file" id="guideVideos" class="form-input" accept="video/*" multiple>
+                    <small class="form-hint">Opcional: puedes subir varios videos</small>
+                </div>
+                
+                <!-- Botón de acción -->
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-database"></i> Request Approval
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

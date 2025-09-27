@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio de Sesión - Set Sharing Site</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="logo-container">
+            <a href="index.html" class="logo">Set Sharing Site</a>
+        </div>
+    </nav>
+    <!-- Contenido principal -->
+    <main class="content1">
+        <div class="form-container">
+            <div class="form-header">
+                <h1>Welcome</h1>
+                <p>Sign In</p>
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" class="form-input" required placeholder="Ej: julio123">
+                    <div class="error-message" id="usernameError">Please enter a valid username</div>
+                </div>
+                
+                <div class="form-group password-container">
+                    <label for="password" href="index.html" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" required placeholder="Tu contraseña">
+                    <div class="error-message" id="passwordError">Invalid password</div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Enter</button>
+                </div>
+                
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="create_account.html" class="text-link">Create one!</a></p>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const data = {
+                username,
+                password
+            };
+
+            // Realizar la solicitud al servidor con fetch
+            fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    window.location.href = 'index.html';  
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud:', error);
+                alert('Hubo un error al intentar iniciar sesión');
+            });
+        });
+    </script>
+</body>
+</html>
