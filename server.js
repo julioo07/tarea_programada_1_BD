@@ -36,6 +36,18 @@ app.get('/api/datasets', async (req, res) => {
   }
 });
 
+app.get('/api/datasets/:id_dataset', async (req, res) => {
+  try {
+    const { id_dataset } = req.params;
+    const dataset = await db.collection('datasets').findOne({ id_dataset });
+    if (!dataset) return res.status(404).json({ error: 'No encontrado' });
+    res.json(dataset);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Ruta para obtener datasets por usuario
 app.get('/api/datasets/usuario/:id_usuario', async (req, res) => {
   try {

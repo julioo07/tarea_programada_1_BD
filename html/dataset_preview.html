@@ -72,111 +72,103 @@
         </aside>
         
         <main class="content">
-            <!-- Encabezado del DataSet -->
-            <div class="course-header">
-                <!-- Imagen grande -->
-                <div class="course-image-large"></div>
-
-                
-
-                <!-- Info -->
-                <div class="course-info-large">
-                <h1 class="course-title-large">Nombre del DataSet</h1>
-                <div class="course-meta">
-                    <div class="meta-item">
-                    <i class="fas fa-user"></i>
-                    <span>Propietario del DataSet</span>
-                    </div>
-                    <div class="meta-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>Incluido: 25/09/2025</span>
-                    </div>               
-                </div>
-                <p class="course-description">
-                    Aquí va la descripción completa del DataSet, explicando qué información contiene,
-                    cómo está estructurado y cuál es su propósito.
-                </p>
-
-                <!-- Valoración promedio -->
-                <div class="course-meta" style="margin-top:12px;">
-                    <div class="meta-item">
-                    <i class="fas fa-star"></i>
-                    <span>Valoración promedio: ★★★★☆ (4.2/5)</span>
-                    </div>
-                </div>
-                </div>
-
-                <!-- Botones debajo de la imagen -->
-                <div class="owner-actions" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn btn-rate" type="button">
-                    <i class="fas fa-star"></i> Rate
-                </button>
-                <button onclick="window.location.href='comments.html'" class="btn btn-outline" type="button">
-                    <i class="fas fa-comment-dots"></i> Comment
-                </button>
-                <button class="btn btn-outline" type="button">
-                    <i class="fas fa-clone"></i> Download
-                </button>
-                </div>
-            </div>
-        
-            <!-- Archivos del DataSet -->
-            <div class="content-section">
-                <h2 class="section-title">Data Set Files</h2>
-                <div class="course-content">
-                <table style="width:100%; border-collapse:collapse;">
-                    <thead>
-                    <tr>
-                        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Nombre</th>
-                        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Tamaño</th>
-                        <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Tipo</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td style="border-bottom:1px solid #eee; padding:8px;">ejercicios.csv</td>
-                        <td style="border-bottom:1px solid #eee; padding:8px;">150 KB</td>
-                        <td style="border-bottom:1px solid #eee; padding:8px;">text/csv</td>
-                    </tr>
-                    <tr>
-                        <td style="border-bottom:1px solid #eee; padding:8px;">ejemplos.json</td>
-                        <td style="border-bottom:1px solid #eee; padding:8px;">98 KB</td>
-                        <td style="border-bottom:1px solid #eee; padding:8px;">application/json</td>
-                    </tr>
-                    </tbody>
-                </table>
-                </div>
-            </div>
-
-            <!-- Videos de guía -->
-            <div class="content-section">
-                <h2 class="section-title">Guide Videos</h2>
-                <div class="course-content">
-
-                <!-- Grilla de videos -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px;">
-                    <div class="video-card" style="border:1px solid #eee; border-radius:8px; padding:8px;">
-                    <div style="font-size:13px; margin-bottom:6px;">
-                        <i class="fas fa-film"></i> ejemplo-uso-1.mp4
-                    </div>
-                    <div style="width:100%; height:140px; background:#f4f4f4; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#999;">
-                        Vista previa
-                    </div>
-                    </div>
-                    <div class="video-card" style="border:1px solid #eee; border-radius:8px; padding:8px;">
-                    <div style="font-size:13px; margin-bottom:6px;">
-                        <i class="fas fa-film"></i> ejemplo-uso-2.mp4
-                    </div>
-                    <div style="width:100%; height:140px; background:#f4f4f4; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#999;">
-                        Preview
-                    </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-        
+            <!-- Contenedor dinámico para el dataset -->
+            <div id="datasetContent"></div>
         </main>
-    </div>
+        <script>
+        async function cargarDataset() {
+            // Cambia el id_dataset según lo que quieras mostrar (puedes obtenerlo por querystring si lo necesitas)
+            const id_dataset = "DS001";
+            const res = await fetch(`http://localhost:3000/api/datasets/${id_dataset}`);
+            const data = await res.json();
+
+            document.getElementById('datasetContent').innerHTML = `
+                <!-- Encabezado del DataSet -->
+                <div class="course-header">
+                    <!-- Imagen grande -->
+                    <div class="course-image-large">
+                        ${data.foto_repositorio?.ruta ? `<img src="${data.foto_repositorio.ruta}" alt="Repo Image" style="max-width:100%;border-radius:8px;">` : ''}
+                    </div>
+                    <!-- Info -->
+                    <div class="course-info-large">
+                        <h1 class="course-title-large">${data.nombre}</h1>
+                        <div class="course-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>${data.id_usuario}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Incluido: ${data.fecha_inclusion?.$date ? new Date(data.fecha_inclusion.$date).toLocaleDateString() : ''}</span>
+                            </div>
+                        </div>
+                        <p class="course-description">
+                            ${data.descripcion}
+                        </p>
+                        <div class="course-meta" style="margin-top:12px;">
+                            <div class="meta-item">
+                                <i class="fas fa-star"></i>
+                                <span>Estado: ${data.estado}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Botones debajo de la imagen -->
+                    <div class="owner-actions" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn btn-rate" type="button">
+                            <i class="fas fa-star"></i> Rate
+                        </button>
+                        <button onclick="window.location.href='comments.html'" class="btn btn-outline" type="button">
+                            <i class="fas fa-comment-dots"></i> Comment
+                        </button>
+                        <button class="btn btn-outline" type="button">
+                            <i class="fas fa-clone"></i> Download
+                        </button>
+                    </div>
+                </div>
+                <!-- Archivos del DataSet -->
+                <div class="content-section">
+                    <h2 class="section-title">Data Set Files</h2>
+                    <div class="course-content">
+                        <table style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Nombre</th>
+                                    <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Tamaño</th>
+                                    <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.archivos?.map(a => `
+                                    <tr>
+                                        <td style="border-bottom:1px solid #eee; padding:8px;">${a.nombre_archivo}</td>
+                                        <td style="border-bottom:1px solid #eee; padding:8px;">${(a.tamaño/1024).toFixed(1)} KB</td>
+                                        <td style="border-bottom:1px solid #eee; padding:8px;">${a.tipo}</td>
+                                    </tr>
+                                `).join('') || ''}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Videos de guía -->
+                <div class="content-section">
+                    <h2 class="section-title">Guide Videos</h2>
+                    <div class="course-content">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px;">
+                            ${data.videos_guia?.map(v => `
+                                <div class="video-card" style="border:1px solid #eee; border-radius:8px; padding:8px;">
+                                    <div style="font-size:13px; margin-bottom:6px;">
+                                        <i class="fas fa-film"></i> ${v.titulo}
+                                    </div>
+                                    <video src="${v.ruta}" controls style="width:100%;height:140px;border-radius:6px;"></video>
+                                </div>
+                            `).join('') || ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        cargarDataset();
+        </script>
     <script>
         
     </script>
