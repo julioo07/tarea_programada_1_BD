@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient } = require('mongodb');
+const multer = require('multer');
 
 const app = express();
 app.use(cors());
@@ -12,6 +13,22 @@ const client = new MongoClient(uri);
 
 // Variable para almacenar la conexión
 let db;
+
+
+// Configuración de multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Carpeta donde se guardan los archivos
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname); // Nombre único
+  }
+});
+const upload = multer({ storage: storage });
+
+app.use(cors());
+app.use(express.json());
+
 
 // Conectar al iniciar el servidor
 async function connectDB() {
@@ -78,26 +95,61 @@ app.get('/api/datasets/buscar/:nombre', async (req, res) => {
   }
 });
 
-// Ruta para crear un nuevo dataset
-app.post('/api/datasets', async (req, res) => {
+
+
+// Ruta para crear un nuevo dataset con archivos
+app.post('/api/datasets', upload.fields([
+  { name: 'avatar', maxCount: 1 },
+  { name: 'archivos' },
+  { name: 'foto_repositorio', maxCount: 1 },
+  { name: 'videos_guia' }
+]), async (req, res) => {
   try {
+    // Construye el objeto dataset con los archivos subidos
     const nuevoDataset = {
-      ...req.body,
-      fecha_inclusion: new Date(),
+      id_dataset: req.body.id_dataset,
+      id_usuario: req.body.id_usuario,
+      nombre: req.body.nombre,
+      descripcion: req.body.descripcion,
+      fecha_inclusion: new Date(req.body.fecha_inclusion),
       fecha_actualizacion: new Date(),
-      estado: 'activo'
+      estado: 'activo',
+      avatar: req.files['avatar'] ? {
+        nombre_archivo: req.files['avatar'][0].filename,
+        ruta: '/uploads/' + req.files['avatar'][0].filename,
+        tipo: req.files['avatar'][0].mimetype,
+        tamaño: req.files['avatar'][0].size
+      } : null,
+      archivos: req.files['archivos'] ? req.files['archivos'].map(f => ({
+        nombre_archivo: f.filename,
+        ruta: '/uploads/' + f.filename,
+        tipo: f.mimetype,
+        tamaño: f.size,
+        fecha_subida: new Date()
+      })) : [],
+      foto_repositorio: req.files['foto_repositorio'] ? {
+        nombre_archivo: req.files['foto_repositorio'][0].filename,
+        ruta: '/uploads/' + req.files['foto_repositorio'][0].filename,
+        tipo: req.files['foto_repositorio'][0].mimetype,
+        tamaño: req.files['foto_repositorio'][0].size
+      } : null,
+      videos_guia: req.files['videos_guia'] ? req.files['videos_guia'].map(f => ({
+        titulo: f.originalname,
+        nombre_archivo: f.filename,
+        ruta: '/uploads/' + f.filename,
+        tipo: f.mimetype,
+        tamaño: f.size,
+        duracion: "" // Puedes agregar lógica para obtener duración si lo necesitas
+      })) : []
     };
-    
+
     const resultado = await db.collection('datasets').insertOne(nuevoDataset);
-    res.status(201).json({ 
-      mensaje: 'Dataset creado exitosamente',
-      id: resultado.insertedId 
-    });
+    res.status(201).json({ mensaje: 'Dataset creado exitosamente', id: resultado.insertedId });
   } catch (err) {
-    console.error('Error creando dataset:', err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // Manejo de cierre graceful
 process.on('SIGINT', async () => {

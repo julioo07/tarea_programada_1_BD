@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "ioredis": "^5.8.0",
-    "mongodb": "^6.5.0"
+    "mongodb": "^6.5.0",
+    "multer": "^2.0.2"
   }
 }
