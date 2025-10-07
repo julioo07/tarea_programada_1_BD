@@ -30,7 +30,7 @@
                         <span>Modify Account</span>
                     </li>
                     <div class="dropdown-divider"></div>
-                    <li class="dropdown-item" id="logoutBtn">
+                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='login.html'">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Log Out</span>
                     </li>
@@ -53,11 +53,10 @@
         <main class="content">
             <!-- Encabezado del perfil -->
             <div class="profile-header">
-                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Foto de perfil" class="profile-avatar">
-                
-                <div class="profile-info">
-                    <h1 class="profile-name">María González</h1>
-                    <p class="profile-username">@m_gonzalez</p>
+                <img id="adminProfileAvatar" class="profile-avatar">
+                    <div class="profile-info">
+                        <h1 class="profile-name" id="adminProfileName">Nombre Apellido</h1>
+                        <p class="profile-username" id="adminProfileUsername">@usuario</p>
                     
                     <form id="add_friend">
                     <div class="profile-actions">
@@ -97,6 +96,7 @@
             </div>
         </main>
     </div>
-    <script ></script>
+    <script src="script.js" defer></script>
+
 </body>
 </html>

@@ -24,13 +24,13 @@
             <form class="login-form" id="loginForm">
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
-                    <input type="text" id="username" class="form-input" required placeholder="Ej: julio123">
+                    <input type="text" id="username" class="form-input" required placeholder="Username">
                     <div class="error-message" id="usernameError">Please enter a valid username</div>
                 </div>
                 
                 <div class="form-group password-container">
-                    <label for="password" href="index.html" class="form-label">Password</label>
-                    <input type="password" id="password" class="form-input" required placeholder="Tu contraseña">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" class="form-input" required placeholder="Password">
                     <div class="error-message" id="passwordError">Invalid password</div>
                 </div>
                 
@@ -44,40 +44,6 @@
             </form>
         </div>
     </main>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            const data = {
-                username,
-                password
-            };
-
-            // Realizar la solicitud al servidor con fetch
-            fetch('http://localhost:3000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    window.location.href = 'index.html';  
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error en la solicitud:', error);
-                alert('Hubo un error al intentar iniciar sesión');
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

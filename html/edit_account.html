@@ -26,19 +26,13 @@
         <!-- Contenido principal -->
         <main class="content1">            
             <div class="form-container">
-                <form id="signupForm">
+                <form id="editAccForm">
                     <h1 class="content-title">Modify Account</h1>
 
                     <div class="form-group">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" id="username" class="form-input" required placeholder="Ej: julio123">
                         <div class="error-message" id="usernameError">The username is already in use</div>
-                    </div>
-                    
-                    <div class="form-group password-container">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" id="password" class="form-input" required placeholder="Mínimo 8 caracteres">
-                        <div class="error-message" id="passwordError">Invalid password</div>
                     </div>
                     
                     <div class="form-group">
@@ -76,6 +70,6 @@
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>

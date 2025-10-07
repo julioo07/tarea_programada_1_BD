@@ -1,8 +1,12 @@
 {
   "dependencies": {
+    "argon2": "^0.44.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "mongodb": "^6.20.0"
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.20.0",
+    "neo4j-driver": "^6.0.0"
   },
   "name": "tarea_programada_1_bd",
   "version": "1.0.0",

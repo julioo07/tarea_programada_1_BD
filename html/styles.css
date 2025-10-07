@@ -655,7 +655,7 @@ display: none;
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
-    border: 5px solid #f8f9fa;
+    border: 5px solid #3ec400;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     margin-right: 40px;
 }

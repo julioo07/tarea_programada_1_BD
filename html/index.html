@@ -26,14 +26,15 @@
         
         <div class="user-menu">
             <div class="user-avatar" id="userAvatar"></div>
+
             <div class="user-dropdown" id="userDropdown">
                 <ul class="dropdown-menu">
-                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='admin_profile.html'">
+                    <li class="dropdown-item" id="profileBtn" >
                         <i class="fas fa-user"></i>
                         <span>My Profile</span>
                     </li>
                     <div class="dropdown-divider"></div>
-                    <li class="dropdown-item" onclick="window.location.href='edit_account.html'">
+                    <li class="dropdown-item" id="editAccountBtn">
                         <i class="fas fa-user-cog"></i>
                         <span>Modify Account</span>
                     </li>
@@ -78,15 +79,11 @@
         <main class="content">
             <h1 class="content-title">Explore Data Sets</h1>
 
-            <div class="friends-list">
+            <div class="dataset-list">
                 <!-- Tarjeta de DataSet -->
                 <div class="friend-card" style="display:flex; align-items:center; gap:16px;">
-                <!-- Imagen tipo avatar -->
                 <div class="friend-avatar">
-                        <img src="" alt="María González">
                     </div>
-
-                <!-- Info -->
                 <div class="course-info" style="flex:1;">
                     <h3 class="course-title">DataSet Name</h3>
                 </div>
