@@ -251,7 +251,7 @@ app.put('/api/account', requireAuth, async (req, res) => {
 
 
 // --- Levantar servidor
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`✅ API escuchando en http://localhost:${PORT}`);
 });
