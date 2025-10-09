@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json()); // Para poder recibir JSON en las peticiones
 
 // Configuración de MongoDB
-const uri = 'mongodb://localhost:27017/datasets_bd'; // Incluye la BD en la URI
+const uri = 'mongodb://localhost:27017'; // Incluye la BD en la URI
 const client = new MongoClient(uri);
 
 // Variable para almacenar la conexión
@@ -34,8 +34,8 @@ app.use(express.json());
 async function connectDB() {
   try {
     await client.connect();
-    db = client.db();
-    console.log('✅ Conectado a MongoDB - datasets_bd');
+    db = client.db('datasets_db'); // Selecciona explícitamente la base de datos
+    console.log('✅ Conectado a MongoDB - datasets_db');
   } catch (err) {
     console.error('❌ Error conectando a MongoDB:', err);
     process.exit(1);
@@ -159,7 +159,7 @@ process.on('SIGINT', async () => {
 });
 
 // Iniciar servidor
-app.listen(3000, async () => {
+app.listen(2000, async () => {
   await connectDB();
-  console.log('🚀 Servidor escuchando en http://localhost:3000');
+  console.log('🚀 Servidor escuchando en http://localhost:2000');
 });
