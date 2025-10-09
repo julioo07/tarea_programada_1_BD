@@ -113,7 +113,7 @@ app.post('/api/datasets', upload.fields([
       descripcion: req.body.descripcion,
       fecha_inclusion: new Date(req.body.fecha_inclusion),
       fecha_actualizacion: new Date(),
-      estado: 'activo',
+      estado: 'pendiente',
       avatar: req.files['avatar'] ? {
         nombre_archivo: req.files['avatar'][0].filename,
         ruta: '/uploads/' + req.files['avatar'][0].filename,
