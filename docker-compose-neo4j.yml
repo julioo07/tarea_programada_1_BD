@@ -1,0 +1,66 @@
+networks:
+  neo-net:
+
+services:
+  core1:
+    image: neo4j:5.22-enterprise
+    container_name: neo4j-core1
+    hostname: core1
+    networks: [neo-net]
+    environment:
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4J_AUTH: neo4j/neo4jpass
+
+      # cluster
+      NEO4J_initial_server_mode__constraint: PRIMARY
+      NEO4J_dbms_cluster_minimum__initial__system__primaries__count: "2"
+      NEO4J_dbms_cluster_discovery_endpoints: "core1:5000,core2:5000"
+
+      # escucha y ANUNCIA localhost para clientes fuera de Docker
+      NEO4J_server_default__listen__address: 0.0.0.0
+      NEO4J_server_default__advertised__address: core1
+
+      # 👇 estas dos líneas son la clave
+      NEO4J_server_bolt_advertised__address: "localhost:7687"
+      NEO4J_server_http_advertised__address: "localhost:7474"
+
+    ports:
+      - "7474:7474"   # HTTP
+      - "7687:7687"   # Bolt
+
+    volumes:
+      - core1-data:/data
+      - core1-logs:/logs
+
+  core2:
+    image: neo4j:5.22-enterprise
+    container_name: neo4j-core2
+    hostname: core2
+    networks: [neo-net]
+    environment:
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4J_AUTH: neo4j/neo4jpass
+
+      # Cluster (nodo PRIMARY)
+      NEO4J_initial_server_mode__constraint: PRIMARY
+      NEO4J_dbms_cluster_minimum__initial__system__primaries__count: "2"
+      NEO4J_dbms_cluster_discovery_endpoints: "core1:5000,core2:5000"
+
+      # Networking
+      NEO4J_server_default__listen__address: 0.0.0.0
+      NEO4J_server_default__advertised__address: core2
+
+      # Servicios
+      NEO4J_server_http_enabled: "true"
+      NEO4J_server_https_enabled: "false"
+      NEO4J_server_bolt_enabled: "true"
+
+    volumes:
+      - core2-data:/data
+      - core2-logs:/logs
+
+volumes:
+  core1-data: {}
+  core1-logs: {}
+  core2-data: {}
+  core2-logs: {}

@@ -119,6 +119,98 @@
         </div>
     </main>
   </div>
-  <script src="script.js"></script>
+  <!-- ...existing code... -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Mostrar la fecha actual en el campo de inclusión
+        const dateElement = document.getElementById("inclusionDate");
+        const today = new Date();
+        dateElement.textContent = today.toLocaleDateString("es-ES", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+        });
+
+        // Vista previa de avatar
+        document.getElementById('datasetAvatar').addEventListener('change', function(e) {
+            const preview = document.getElementById('avatarPreview');
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    preview.innerHTML = `<img src="${ev.target.result}" style="max-width:100px;border-radius:8px;">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = `<div class="image-placeholder"><i class="fas fa-image"></i></div>`;
+            }
+        });
+
+        // Vista previa de imagen del repositorio
+        document.getElementById('repoImage').addEventListener('change', function(e) {
+            const preview = document.getElementById('repoImagePreview');
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    preview.innerHTML = `<img src="${ev.target.result}" style="max-width:100px;border-radius:8px;">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = `<div class="image-placeholder"><i class="fas fa-database"></i></div>`;
+            }
+        });
+
+        // Envío del formulario
+        document.getElementById('datasetForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData();
+
+            // Datos básicos
+            formData.append('id_dataset', 'DS' + Math.floor(Math.random() * 10000));
+            formData.append('id_usuario', 'USR001'); // Cambia por el usuario real
+            formData.append('nombre', form.datasetName.value);
+            formData.append('descripcion', form.datasetDescription.value);
+            formData.append('fecha_inclusion', new Date().toISOString());
+
+            // Avatar
+            if (form.datasetAvatar.files[0]) {
+                formData.append('avatar', form.datasetAvatar.files[0]);
+            }
+
+            // Archivos
+            for (const file of form.datasetFiles.files) {
+                formData.append('archivos', file);
+            }
+
+            // Imagen repositorio
+            if (form.repoImage.files[0]) {
+                formData.append('foto_repositorio', form.repoImage.files[0]);
+            }
+
+            // Videos de guía
+            for (const file of form.guideVideos.files) {
+                formData.append('videos_guia', file);
+            }
+
+            // Enviar al backend
+            const res = await fetch('http://localhost:3000/api/datasets', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await res.json();
+            if (res.ok) {
+                alert('Dataset creado exitosamente');
+                window.location.href = 'admin_dataset_list.html';
+            } else {
+                alert('Error: ' + result.error);
+            }
+        });
+    });
+    </script>
 </body>
 </html>
