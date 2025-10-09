@@ -71,6 +71,31 @@
                     <i class="fas fa-database"></i> See
                     </button>
                 </div>
+                <script>
+                async function cargarDatasetsPendientes() {
+                const res = await fetch('http://localhost:2000/api/datasets?estado=pendiente');
+                const datasets = await res.json();
+                document.getElementById('datasetsList').innerHTML = datasets.map(ds => `
+                    <div class="friend-card" style="display:flex; align-items:center; gap:16px;">
+                    <div class="friend-avatar">
+                        <img src="${ds.avatar?.ruta || ''}" alt="${ds.nombre}">
+                    </div>
+                    <div class="course-info" style="flex:1;">
+                        <h3 class="course-title">${ds.nombre}</h3>
+                    </div>
+                    <div class="action-buttons" style="display:flex; gap:8px;">
+                        <button onclick="window.location.href='dataset_preview.html?id=${ds.id_dataset}'" class="btn btn-primary">
+                        <i class="fas fa-database"></i> Ver
+                        </button>
+                        <button type="button" class="btn btn-outline">
+                        Aprobar
+                        </button>
+                    </div>
+                    </div>
+                `).join('');
+                }
+                cargarDatasetsPendientes();
+                </script>                
                 </div>
             </div>
         </main>
