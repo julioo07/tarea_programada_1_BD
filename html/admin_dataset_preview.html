@@ -78,7 +78,7 @@
     async function cargarDataset() {
         // Puedes obtener el id_dataset por querystring, aquí está fijo como ejemplo
         const id_dataset = "DS001";
-        const res = await fetch(`http://localhost:3000/api/datasets/${id_dataset}`);
+        const res = await fetch(`http://localhost:2000/api/datasets/${id_dataset}`);
         const data = await res.json();
 
         document.getElementById('datasetContent').innerHTML = `

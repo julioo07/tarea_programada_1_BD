@@ -54,7 +54,7 @@
     </main>
     <script>
     async function cargarDatasetsPendientes() {
-        const res = await fetch('http://localhost:3000/api/datasets?estado=pendiente');
+        const res = await fetch('http://localhost:2000/api/datasets?estado=pendiente');
         const datasets = await res.json();
 
         document.getElementById('datasetsList').innerHTML = datasets.map(ds => `
