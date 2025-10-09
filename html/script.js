@@ -23,6 +23,22 @@ function userAvatarSrc(u) {
   return `https://ui-avatars.com/api/?name=${label}`;
 }
 
+async function followUser(targetId) {
+  return fetchJSON(`${API_BASE}/api/follow`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ targetId })
+  });
+}
+
+async function getFollowStatus(targetId) {
+  return fetchJSON(`${API_BASE}/api/follow/${encodeURIComponent(targetId)}`);
+}
+
+
+
+
+
 
 
 // LOGIN
@@ -64,6 +80,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const approveLink = document.getElementById('manageCoursesItem');
+  if (!approveLink) return;
+
+  // Ocúltalo de entrada para evitar parpadeo
+  approveLink.hidden = true;
+  approveLink.style.display = 'none';
+  try {
+    const me = await fetchJSON(`${API_BASE}/api/auth/me`);
+
+    // Toma el role de forma defensiva y en minúsculas
+    const role = String(me?.role || me?.user?.role || '').toLowerCase();
+
+    // Muestra solo si es admin
+    const isAdmin = role === 'admin';
+    approveLink.hidden = !isAdmin;
+    if (isAdmin) {
+      // quita cualquier override inline de display
+      approveLink.style.removeProperty('display');
+    } else {
+      approveLink.style.display = 'none';
+    }
+  } catch (_) {
+    // si falla me, lo dejamos oculto
+    approveLink.hidden = true;
+    approveLink.style.display = 'none';
+  }
+});
+
 
 
 // CREATE ACCOUNT
@@ -123,10 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!res.ok) {
         const msg = (data && data.message) ? data.message : `Error HTTP ${res.status}`;
-        throw new Error(msg);
+        //throw new Error(msg);
       }
 
-      alert('Cuenta creada ✅. Ahora puedes iniciar sesión.');
       window.location.href = 'login.html';
     } catch (err) {
       console.error('Signup falló:', err);
@@ -134,6 +180,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+
 
 
 
@@ -176,6 +224,15 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       return;
     }
+    users.forEach(u => {
+      // Guarda solo lo que necesitas en el perfil
+      sessionStorage.setItem(`profile-cache:${u.id}`, JSON.stringify({
+        id: u.id,
+        username: u.username,
+        fullName: u.fullName,
+        avatar: u.avatar || null
+      }));
+    });
 
     const cards = users.map(u => {
       // Ajusta el destino de "Profile" si tienes páginas de perfil por id/username
@@ -192,10 +249,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="action-buttons">
             <button class="btn btn-primary" data-profile="${profileHref}">
               <i class="fas fa-id-badge"></i> Profile
-            </button>
-            <button class="btn btn-outline" data-follow="${u.id}">
-              Follow
-            </button>
           </div>
         </div>
       `;
@@ -207,7 +260,18 @@ document.addEventListener('DOMContentLoaded', () => {
     listContainer.querySelectorAll('button[data-profile]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const href = e.currentTarget.getAttribute('data-profile');
-        window.location.href = href;
+        const uid  = e.currentTarget.getAttribute('data-uid');
+
+        // 1) busca el user en el pre-cache y lo promueve a 'profileUser'
+        if (uid) {
+          const cached = sessionStorage.getItem(`profile-cache:${uid}`);
+          if (cached) {
+            sessionStorage.setItem('profileUser', cached);
+          }
+        }
+
+        // 2) navega (sigue usando tu href actual)
+        window.location.href = href || `profile.html?user=${encodeURIComponent(uid)}`;
       });
     });
 
@@ -215,8 +279,13 @@ document.addEventListener('DOMContentLoaded', () => {
     listContainer.querySelectorAll('button[data-follow]').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const uid = e.currentTarget.getAttribute('data-follow');
-        // Aquí podrías llamar a tu endpoint de follow si existe.
-        alert('Follow clicked (demo) for user id: ' + uid);
+        try {
+          await followUser(uid);
+          e.currentTarget.textContent = 'Already following';
+          e.currentTarget.disabled = true;
+        } catch (err) {
+          alert('No se pudo seguir: ' + err.message);
+        }
       });
     });
   }
@@ -469,7 +538,7 @@ window.addEventListener('pageshow', (e) => {
 
 // Guardar cambios en Modify Account (submit del form)
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('signupForm');
+  const form = document.getElementById('editAccForm');
   if (!form) return;
 
   const $ = (id) => document.getElementById(id);
@@ -535,6 +604,244 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+// ===== PERFIL (profile.html) =====
+(function () {
+  function qs(name) {
+    const m = new RegExp('[?&]' + name + '=([^&#]*)').exec(window.location.search);
+    return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null;
+  }
+
+  function avatarSrc(user) {
+    if (user?.avatar && user.avatar.startsWith('data:')) return user.avatar;
+    const name = encodeURIComponent(user?.fullName || user?.username || 'User');
+    return `https://ui-avatars.com/api/?name=${name}&background=random`;
+  }
+
+  async function initProfilePage() {
+    const avatarEl = document.getElementById('profileAvatar');
+    const nameEl   = document.getElementById('profileName');
+    const userEl   = document.getElementById('profileUsername');
+    if (!avatarEl || !nameEl || !userEl) return; // no es profile.html
+
+    // 1) Preferir lo que dejó la lista
+    let user = null;
+    try {
+      const raw = sessionStorage.getItem('profileUser');
+      if (raw) user = JSON.parse(raw);
+    } catch (_) {}
+
+    // 2) Fallback: si no hay, intenta usar ?user=<id> para leer del pre-cache
+    if (!user) {
+      const uid = qs('user') || qs('uid');
+      if (uid) {
+        const cached = sessionStorage.getItem(`profile-cache:${uid}`);
+        if (cached) {
+          user = JSON.parse(cached);
+        } else {
+          // 3) Último fallback: pedir al backend
+          const fetched = await fetchUserByUid(uid);
+          if (fetched) {
+            user = {
+              id: fetched.id,
+              username: fetched.username,
+              fullName: fetched.fullName,
+              avatar: fetched.avatar || null
+            };
+          }
+        }
+      }
+    }
+
+    // 4) Si aún no hay, usa placeholder
+    if (!user) user = { username: 'unknown', fullName: 'Unknown User', avatar: null };
+
+    // 5) Pinta
+    avatarEl.src = avatarSrc(user);
+    nameEl.textContent = user.fullName || user.username || 'Usuario';
+    userEl.textContent = user.username ? '@' + user.username : '';
+
+
+    const form = document.getElementById('add_friend');
+    const followBtn = form?.querySelector('button[type="submit"]');
+
+    // Intenta obtener el id del usuario de perfil
+    const uidFromQS = (function () {
+      const m = /[?&]user=([^&#]+)/.exec(window.location.search);
+      return m ? decodeURIComponent(m[1]) : null;
+    })();
+
+    const targetId = (user && user.id) ? user.id : uidFromQS;
+
+    if (form && followBtn && targetId) {
+      // 1) Cargar estado de follow para pintar el botón correctamente
+      try {
+        const st = await getFollowStatus(targetId);
+        if (st?.following) {
+          followBtn.textContent = 'Already following';
+          followBtn.disabled = true;
+        }
+      } catch (_) {
+        // si falla el status, no bloqueamos la UI; el POST fallará si no procede
+      }
+
+      // 2) Envío del follow
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          await followUser(targetId);
+          followBtn.textContent = 'Already following';
+          followBtn.disabled = true;
+        } catch (err) {
+          alert('No se pudo seguir: ' + err.message);
+        }
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', initProfilePage);
+})();
+
+
+
+// ===== FOLLOWERS LIST (followers_list.html) =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Detectar si estamos en followers_list.html por los elementos clave:
+  const listContainer = document.querySelector('.followers-list');
+  const searchForm = document.getElementById('searchForm');
+  const searchInput = document.getElementById('searchInput');
+  const titleEl = document.querySelector('.content-title');
+
+  if (!listContainer || !searchForm || !searchInput) {
+    // No estamos en esta página
+    return;
+  }
+
+  // Ajusta el título para que no quede "Explore Users"
+  if (titleEl) titleEl.textContent = 'Followers';
+
+  // Helper: avatar HTML
+  function avatarHTML(user) {
+    // Usa base64 si viene del backend
+    if (user.avatar && typeof user.avatar === 'string' && user.avatar.startsWith('data:image')) {
+      return `<img class="friend-avatar-img" src="${user.avatar}" alt="${user.fullName || user.username}">`;
+    }
+    // Fallback: iniciales
+    const name = (user.fullName || user.username || 'U').trim();
+    const initials = name.split(/\s+/).map(s => s[0]).join('').slice(0, 2).toUpperCase();
+    return `
+      <div class="friend-avatar-fallback">
+        <span>${initials}</span>
+      </div>
+    `;
+  }
+
+  function profileHrefFor(u) {
+    return `profile.html?user=${encodeURIComponent(u.id)}`;
+  }
+
+  // Render de tarjetas (misma estética que explore)
+  function renderUsers(users) {
+    if (!Array.isArray(users) || users.length === 0) {
+      listContainer.innerHTML = `
+        <div class="empty-state">
+          <p>No followers found.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Cache ligero para cargar perfil más rápido
+    users.forEach(u => {
+      sessionStorage.setItem(`profile-cache:${u.id}`, JSON.stringify({
+        id: u.id,
+        username: u.username,
+        fullName: u.fullName,
+        avatar: u.avatar || null
+      }));
+    });
+
+    const cards = users.map(u => {
+      const profileHref = profileHrefFor(u);
+      return `
+        <div class="friend-card">
+          <div class="friend-avatar">
+            ${avatarHTML(u)}
+          </div>
+          <div class="friend-info">
+            <div class="friend-name">${(u.fullName || u.username || 'Unknown')}</div>
+            <div class="friend-username">${u.username ? '@' + u.username : ''}</div>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-primary"
+                    data-profile="${profileHref}"
+                    data-uid="${u.id}">
+              <i class="fas fa-id-badge"></i> Profile
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    listContainer.innerHTML = cards;
+
+    // Delegación de eventos para abrir perfil
+    listContainer.querySelectorAll('button[data-profile]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const href = e.currentTarget.getAttribute('data-profile');
+        const uid  = e.currentTarget.getAttribute('data-uid');
+
+        if (uid) {
+          const cached = sessionStorage.getItem(`profile-cache:${uid}`);
+          if (cached) sessionStorage.setItem('profileUser', cached);
+        }
+        window.location.href = href || `profile.html?user=${encodeURIComponent(uid)}`;
+      });
+    });
+  }
+
+  // Carga followers desde API (filtra por q en backend)
+  async function loadFollowers(q = '') {
+    try {
+      const url = `${API_BASE}/api/followers?q=${encodeURIComponent(q)}`;
+      const data = await fetchJSON(url);  // tu helper global con headers/auth
+      // data: { users: [ {id, username, fullName, avatar} ] }
+      renderUsers(data.users || []);
+    } catch (err) {
+      console.error('Error cargando followers:', err);
+      listContainer.innerHTML = `
+        <div class="empty-state error">
+          <p>Could not load followers: ${err.message}</p>
+        </div>
+      `;
+    }
+  }
+
+  // Búsqueda
+  searchForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = searchInput.value.trim();
+    loadFollowers(q);
+  });
+
+  // Búsqueda reactiva (debounce)
+  let t;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => loadFollowers(searchInput.value.trim()), 300);
+  });
+
+  // Inicial
+  loadFollowers('');
+});
+
+
+const btnFollowers = document.getElementById('btnFollowers');
+if (btnFollowers) {
+  btnFollowers.addEventListener('click', () => {
+    window.location.href = 'followers_list.html';
+  });
+}
 
 
 

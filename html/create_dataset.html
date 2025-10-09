@@ -18,19 +18,20 @@
       
       <div class="user-menu">
             <div class="user-avatar" id="userAvatar"></div>
+
             <div class="user-dropdown" id="userDropdown">
                 <ul class="dropdown-menu">
-                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='admin_profile.html'">
+                    <li class="dropdown-item" id="profileBtn" >
                         <i class="fas fa-user"></i>
                         <span>My Profile</span>
                     </li>
                     <div class="dropdown-divider"></div>
-                    <li class="dropdown-item" onclick="window.location.href='edit_account.html'">
+                    <li class="dropdown-item" id="editAccountBtn">
                         <i class="fas fa-user-cog"></i>
                         <span>Modify Account</span>
                     </li>
                     <div class="dropdown-divider"></div>
-                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='login.html'">
+                    <li class="dropdown-item" id="logoutBtn">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Log Out</span>
                     </li>
@@ -46,101 +47,78 @@
     </button>
   </div>
 
-  <!-- ...existing code... -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Mostrar la fecha actual en el campo de inclusión
-        const dateElement = document.getElementById("inclusionDate");
-        const today = new Date();
-        dateElement.textContent = today.toLocaleDateString("es-ES", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric"
-        });
+  <div class="main-container">
+    <!-- Contenido principal -->
+    <main class="content1">            
+        <div class="form-container">
+            <form id="datasetForm">
+                <h1 class="content-title">Create Data Set</h1>
 
-        // Vista previa de avatar
-        document.getElementById('datasetAvatar').addEventListener('change', function(e) {
-            const preview = document.getElementById('avatarPreview');
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    preview.innerHTML = `<img src="${ev.target.result}" style="max-width:100px;border-radius:8px;">`;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                preview.innerHTML = `<div class="image-placeholder"><i class="fas fa-image"></i></div>`;
-            }
-        });
-
-        // Vista previa de imagen del repositorio
-        document.getElementById('repoImage').addEventListener('change', function(e) {
-            const preview = document.getElementById('repoImagePreview');
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    preview.innerHTML = `<img src="${ev.target.result}" style="max-width:100px;border-radius:8px;">`;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                preview.innerHTML = `<div class="image-placeholder"><i class="fas fa-database"></i></div>`;
-            }
-        });
-
-        // Envío del formulario
-        document.getElementById('datasetForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const form = e.target;
-            const formData = new FormData();
-
-            // Datos básicos
-            formData.append('id_dataset', 'DS' + Math.floor(Math.random() * 10000));
-            formData.append('id_usuario', 'USR001'); // Cambia por el usuario real
-            formData.append('nombre', form.datasetName.value);
-            formData.append('descripcion', form.datasetDescription.value);
-            formData.append('fecha_inclusion', new Date().toISOString());
-
-            // Avatar
-            if (form.datasetAvatar.files[0]) {
-                formData.append('avatar', form.datasetAvatar.files[0]);
-            }
-
-            // Archivos
-            for (const file of form.datasetFiles.files) {
-                formData.append('archivos', file);
-            }
-
-            // Imagen repositorio
-            if (form.repoImage.files[0]) {
-                formData.append('foto_repositorio', form.repoImage.files[0]);
-            }
-
-            // Videos de guía
-            for (const file of form.guideVideos.files) {
-                formData.append('videos_guia', file);
-            }
-
-            // Enviar al backend
-            const res = await fetch('http://localhost:3000/api/datasets', {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await res.json();
-            if (res.ok) {
-                alert('Dataset creado exitosamente');
-                window.location.href = 'admin_dataset_list.html';
-            } else {
-                alert('Error: ' + result.error);
-            }
-        });
-    });
-    </script>
-    <!-- ...existing code... -->
-
+                <!-- Nombre -->
+                <div class="form-group">
+                    <label for="datasetName" class="form-label">Data Set Name</label>
+                    <input type="text" id="datasetName" class="form-input" required placeholder="Ej: Ventas_2025">
+                    <div class="error-message" id="datasetNameError">El nombre ya está en uso</div>
+                </div>
+                
+                <!-- Descripción -->
+                <div class="form-group description-container">
+                    <label for="datasetDescription" class="form-label">Description</label>
+                    <textarea id="datasetDescription" class="form-input" rows="4" required placeholder="Describe el contenido del Data Set..."></textarea>
+                </div>
+                
+                <!-- Fecha de Inclusión -->
+                <div class="form-group">
+                    <label class="form-label">Inclusion Date</label>
+                    <span id="inclusionDate" class="form-date"></span>
+                </div>
+                
+                <!-- Foto o avatar -->
+                <div class="form-group">
+                    <label for="datasetAvatar" class="form-label">Photo / Avatar</label>
+                    <input type="file" id="datasetAvatar" class="form-input" accept="image/*">
+                    <div class="image-preview" id="avatarPreview">
+                        <div class="image-placeholder">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Archivos -->
+                <div class="form-group">
+                    <label for="datasetFiles" class="form-label">Files</label>
+                    <input type="file" id="datasetFiles" class="form-input" multiple required>
+                    <small class="form-hint">Puedes subir uno o varios archivos</small>
+                </div>
+                
+                <!-- Imagen descriptiva del repositorio -->
+                <div class="form-group">
+                    <label for="repoImage" class="form-label">Repository Image</label>
+                    <input type="file" id="repoImage" class="form-input" accept="image/*">
+                    <div class="image-preview" id="repoImagePreview">
+                        <div class="image-placeholder">
+                            <i class="fas fa-database"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Videos de guía -->
+                <div class="form-group">
+                    <label for="guideVideos" class="form-label">Guide Videos</label>
+                    <input type="file" id="guideVideos" class="form-input" accept="video/*" multiple>
+                    <small class="form-hint">Opcional: puedes subir varios videos</small>
+                </div>
+                
+                <!-- Botón de acción -->
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-database"></i> Request Approval
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>

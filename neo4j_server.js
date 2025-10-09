@@ -8,13 +8,6 @@ const crypto = require('crypto');
 
 const app = express();
 
-// Para desarrollo (acepta también file:// y cualquier origen HTTP local)
-app.use(cors({
-  origin: (origin, cb) => cb(null, true),
-  credentials: false
-}));
-// Si quieres manejar explícitamente preflight en Express 5:
-app.options(/.*/, cors());
 
 
 app.use(express.json({ limit: '5mb' }));
@@ -25,8 +18,18 @@ const driver = neo4j.driver(
   process.env.NEO4J_URI,
   neo4j.auth.basic(process.env.NEO4J_USER, process.env.NEO4J_PASS)
 );
-const sRO = () => driver.session({ defaultAccessMode: neo4j.session.READ,  database: 'neo4j' });
-const sRW = () => driver.session({ defaultAccessMode: neo4j.session.WRITE, database: 'neo4j' });
+const sRO = () => driver.session({ defaultAccessMode: neo4j.session.READ,  database: "neo4j" });
+const sRW = () => driver.session({ defaultAccessMode: neo4j.session.WRITE, database: "neo4j" });
+
+// Para desarrollo (acepta también file:// y cualquier origen HTTP local)
+app.use(cors({
+  origin: (origin, cb) => cb(null, true),
+  credentials: false
+}));
+// Si quieres manejar explícitamente preflight en Express 5:
+app.options(/.*/, cors());
+
+
 
 // --- Helpers
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
@@ -87,18 +90,15 @@ app.post('/api/auth/signup', async (req, res) => {
         u.passwordHash = $passwordHash,
         u.salt         = $salt,
         u.fullName     = $fullName,
-        u.birthDate    = toString($birthDate),
+        u.birthDate    = date($birthDate),
         u.avatar       = coalesce($avatarBase64, ''),   // opcional: guarda base64
-        u.roles        = ['member'],
+        u.role         = 'member',
         u.createdAt    = datetime()
       ON MATCH SET
         u.fullName     = coalesce($fullName, u.fullName),
         u.birthDate    = coalesce(date($birthDate), u.birthDate),
         u.avatar       = coalesce($avatarBase64, u.avatar)
-      WITH u
-      MERGE (r:Role {name:'member'})
-      MERGE (u)-[:HAS_ROLE]->(r)
-      RETURN u { .id, .username, .fullName } AS user
+      RETURN u { .id, .username, .fullName, .role } AS user
     `, { username, passwordHash, salt, fullName, birthDate, avatarBase64 });
 
     const user = result.records[0]?.get('user');
@@ -114,6 +114,9 @@ app.post('/api/auth/signup', async (req, res) => {
     await session.close();
   }
 });
+
+
+
 
 
 // --- LOGIN (lo básico)
@@ -161,6 +164,10 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+
+
+
+
 // --- (Opcional) quién soy
 app.get('/api/auth/me', requireAuth, async (req, res) => {
   const session = sRO();
@@ -168,7 +175,7 @@ app.get('/api/auth/me', requireAuth, async (req, res) => {
     const result = await session.run(
       `
       MATCH (u:User {id:$id})
-      RETURN u { .id, .username, .email, .fullName, .createdAt, .birthDate, .avatar } AS user
+      RETURN u { .id, .username, .email, .fullName, .createdAt, birthDate: toString(u.birthDate), .avatar, .role} AS user
       `,
       { id: req.user.sub }
     );
@@ -180,6 +187,9 @@ app.get('/api/auth/me', requireAuth, async (req, res) => {
     await session.close();
   }
 });
+
+
+
 
 
 // BUSCAR
@@ -194,9 +204,10 @@ app.get('/api/users', requireAuth, async (req, res) => {
         AND (
           $q = '' OR
           toLower(u.username) CONTAINS toLower($q) OR
-          toLower(u.fullName) CONTAINS toLower($q)
+          toLower(u.fullName)  CONTAINS toLower($q)
         )
-      RETURN u { .id, .username, .fullName, .avatar } AS user
+      OPTIONAL MATCH (me:User {id:$me})-[:FOLLOWS]->(u)
+      RETURN u { .id, .username, .fullName, .avatar, following: me IS NOT NULL } AS user
       ORDER BY coalesce(u.fullName, u.username)
       `,
       { me: req.user.sub, q }
@@ -210,6 +221,9 @@ app.get('/api/users', requireAuth, async (req, res) => {
     await session.close();
   }
 });
+
+
+
 
 
 // --- UPDATE MY ACCOUNT
@@ -227,7 +241,7 @@ app.put('/api/account', requireAuth, async (req, res) => {
         u.fullName  = coalesce($fullName, u.fullName),
         u.birthDate = coalesce(date($birthDate), u.birthDate),
         u.avatar    = coalesce($avatarBase64, u.avatar)
-      RETURN u { .id, .username, .fullName, .birthDate, .avatar } AS user
+      RETURN u { .id, .username, .fullName, birthDate: toString(u.birthDate), .avatar} AS user
       `,
       { id: req.user.sub, username, fullName, birthDate, avatarBase64 }
     );
@@ -242,6 +256,112 @@ app.put('/api/account', requireAuth, async (req, res) => {
       return res.status(409).json({ message: 'El username ya existe' });
     }
     console.error('update account error:', e);
+    res.status(500).json({ message: 'Error de servidor' });
+  } finally {
+    await session.close();
+  }
+});
+
+
+
+
+
+// --- FOLLOW: crear relación me -> target
+app.post('/api/follow', requireAuth, async (req, res) => {
+  const { targetId } = req.body || {};
+  if (!targetId) return res.status(400).json({ message: 'Falta targetId' });
+  if (targetId === req.user.sub) return res.status(400).json({ message: 'No puedes seguirte a ti mism@' });
+
+  const session = sRW();
+  try {
+    const result = await session.run(
+      `
+      MATCH (me:User {id:$me}), (u:User {id:$target})
+      MERGE (me)-[r:FOLLOWS]->(u)
+      ON CREATE SET r.createdAt = datetime()
+      ON MATCH  SET r.createdAt = coalesce(r.createdAt, datetime())
+      RETURN true AS ok
+      `,
+      { me: req.user.sub, target: targetId }
+    );
+    if (result.records.length === 0) return res.status(404).json({ message: 'Usuario objetivo no encontrado' });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('follow error:', e);
+    res.status(500).json({ message: 'Error de servidor' });
+  } finally {
+    await session.close();
+  }
+});
+
+// --- FOLLOW status: ¿ya sigo a :id?
+app.get('/api/follow/:id', requireAuth, async (req, res) => {
+  const targetId = req.params.id;
+  const session = sRO();
+  try {
+    const result = await session.run(
+      `
+      MATCH (me:User {id:$me}), (u:User {id:$target})
+      OPTIONAL MATCH (me)-[r:FOLLOWS]->(u)
+      RETURN r IS NOT NULL AS following
+      `,
+      { me: req.user.sub, target: targetId }
+    );
+    const following = result.records[0]?.get('following') === true;
+    res.json({ following });
+  } catch (e) {
+    console.error('follow status error:', e);
+    res.status(500).json({ message: 'Error de servidor' });
+  } finally {
+    await session.close();
+  }
+});
+
+// --- (Opcional) Unfollow: borrar relación
+app.delete('/api/follow/:id', requireAuth, async (req, res) => {
+  const targetId = req.params.id;
+  const session = sRW();
+  try {
+    await session.run(
+      `
+      MATCH (me:User {id:$me})-[r:FOLLOWS]->(u:User {id:$target})
+      DELETE r
+      `,
+      { me: req.user.sub, target: targetId }
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('unfollow error:', e);
+    res.status(500).json({ message: 'Error de servidor' });
+  } finally {
+    await session.close();
+  }
+});
+
+
+
+
+
+// Lista de seguidores: usuarios que SIGUEN a "me"
+app.get('/api/followers', requireAuth, async (req, res) => {
+  const q = (req.query.q || '').trim();
+  const session = sRO();
+  try {
+    const result = await session.run(
+      `
+      MATCH (me:User {id:$me})
+      MATCH (u:User)-[:FOLLOWS]->(me)
+      WHERE $q = '' OR toLower(u.username) CONTAINS toLower($q)
+                  OR toLower(u.fullName)  CONTAINS toLower($q)
+      RETURN u { .id, .username, .fullName, .avatar } AS user
+      ORDER BY coalesce(u.fullName, u.username)
+      `,
+      { me: req.user.sub, q }
+    );
+    const users = result.records.map(r => r.get('user'));
+    res.json({ users });
+  } catch (e) {
+    console.error('followers error:', e);
     res.status(500).json({ message: 'Error de servidor' });
   } finally {
     await session.close();

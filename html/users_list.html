@@ -29,12 +29,12 @@
 
             <div class="user-dropdown" id="userDropdown">
                 <ul class="dropdown-menu">
-                    <li class="dropdown-item"  >
+                    <li class="dropdown-item" id="profileBtn" >
                         <i class="fas fa-user"></i>
                         <span>My Profile</span>
                     </li>
                     <div class="dropdown-divider"></div>
-                    <li class="dropdown-item" >
+                    <li class="dropdown-item" id="editAccountBtn">
                         <i class="fas fa-user-cog"></i>
                         <span>Modify Account</span>
                     </li>
@@ -71,14 +71,9 @@
                     </div>
                     <form id="add_friend">
                     <div class="action-buttons">
-                        <button onclick="window.location.href='profile.html'" class="btn btn-primary">
+                        <button class="btn btn-primary" data-profile="${profileHref}" data-uid="${u.id}">
                             <i></i> Profile
-                        </button>
-                        
-                        <button type="submit" class="btn btn-outline">
-                            Follow
-                        </button>
-                        
+                        </button>                        
                     </div>
                     </form>
                 </div>  

@@ -18,19 +18,20 @@
         
        <div class="user-menu">
             <div class="user-avatar" id="userAvatar"></div>
+
             <div class="user-dropdown" id="userDropdown">
                 <ul class="dropdown-menu">
-                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='admin_profile.html'">
+                    <li class="dropdown-item" id="profileBtn" >
                         <i class="fas fa-user"></i>
                         <span>My Profile</span>
                     </li>
                     <div class="dropdown-divider"></div>
-                    <li class="dropdown-item" onclick="window.location.href='edit_account.html'">
+                    <li class="dropdown-item" id="editAccountBtn">
                         <i class="fas fa-user-cog"></i>
                         <span>Modify Account</span>
                     </li>
                     <div class="dropdown-divider"></div>
-                    <li class="dropdown-item" id="logoutBtn" onclick="window.location.href='login.html'">
+                    <li class="dropdown-item" id="logoutBtn">
                         <i class="fas fa-sign-out-alt"></i>
                         <span>Log Out</span>
                     </li>
@@ -53,20 +54,20 @@
         <main class="content">
             <!-- Encabezado del perfil -->
             <div class="profile-header">
-                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Foto de perfil" class="profile-avatar">
-                
+                <img id="profileAvatar" alt="Foto de perfil" class="profile-avatar">
+
                 <div class="profile-info">
-                    <h1 class="profile-name">María González</h1>
-                    <p class="profile-username">@m_gonzalez</p>
-                    
+                    <h1 id="profileName" class="profile-name"></h1>
+                    <p id="profileUsername" class="profile-username"></p>
+
                     <form id="add_friend">
                     <div class="profile-actions">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-share-alt"></i> Follow
+                        <i class="fas fa-share-alt"></i> Follow
                         </button>
 
-                        <button type="submit" class="btn btn-primary">
-                            <i onclick="window.location.href='message.html'" class="fas fa-comment-dots"></i> Message
+                        <button type="button" class="btn btn-primary" onclick="window.location.href='message.html'">
+                        <i class="fas fa-comment-dots"></i> Message
                         </button>
                     </div>
                     </form>
@@ -101,6 +102,6 @@
             </div>
         </main>
     </div>
-    <script ></script>
+    <script src="script.js"></script>
 </body>
 </html>
