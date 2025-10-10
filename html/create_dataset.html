@@ -54,6 +54,13 @@
             <form id="datasetForm">
                 <h1 class="content-title">Create Data Set</h1>
 
+                <!-- ID del Dataset (solo lectura) -->
+                <div class="form-group">
+                    <label for="datasetId" class="form-label">Data Set ID</label>
+                    <input type="text" id="datasetId" class="form-input" readonly>
+                    <small class="form-hint">Este ID se genera automáticamente</small>
+                </div>
+
                 <!-- Nombre -->
                 <div class="form-group">
                     <label for="datasetName" class="form-label">Data Set Name</label>
@@ -119,9 +126,27 @@
         </div>
     </main>
   </div>
-  <!-- ...existing code... -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
+
+  <script>
+    // Variable global para el siguiente ID
+    let nextDatasetId = 1;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Obtener el último ID del servidor al cargar la página
+        try {
+            const response = await fetch('http://localhost:3000/api/datasets/last-id');
+            const data = await response.json();
+            nextDatasetId = data.lastId + 1;
+        } catch (error) {
+            console.log('No se pudo obtener el último ID, usando valor por defecto');
+            // Si no se puede obtener del servidor, intentar cargar desde localStorage
+            const savedId = localStorage.getItem('lastDatasetId');
+            nextDatasetId = savedId ? parseInt(savedId) + 1 : 1;
+        }
+
+        // Mostrar el ID generado
+        document.getElementById('datasetId').value = `DS${nextDatasetId.toString().padStart(4, '0')}`;
+
         // Mostrar la fecha actual en el campo de inclusión
         const dateElement = document.getElementById("inclusionDate");
         const today = new Date();
@@ -167,10 +192,11 @@
             e.preventDefault();
 
             const form = e.target;
+            const datasetId = `DS${nextDatasetId.toString().padStart(4, '0')}`;
             const formData = new FormData();
 
             // Datos básicos
-            formData.append('id_dataset', 'DS' + Math.floor(Math.random() * 10000));
+            formData.append('id_dataset', datasetId);
             formData.append('id_usuario', 'USR001'); // Cambia por el usuario real
             formData.append('nombre', form.datasetName.value);
             formData.append('descripcion', form.datasetDescription.value);
@@ -197,20 +223,29 @@
             }
 
             // Enviar al backend
-            const res = await fetch('http://localhost:3000/api/datasets', {
-                method: 'POST',
-                body: formData
-            });
+            try {
+                const res = await fetch('http://localhost:3000/api/datasets', {
+                    method: 'POST',
+                    body: formData
+                });
 
-            const result = await res.json();
-            if (res.ok) {
-                alert('Dataset creado exitosamente');
-                window.location.href = 'admin_dataset_list.html';
-            } else {
-                alert('Error: ' + result.error);
+                const result = await res.json();
+                if (res.ok) {
+                    // Incrementar el ID para el próximo dataset
+                    nextDatasetId++;
+                    localStorage.setItem('lastDatasetId', nextDatasetId.toString());
+                    
+                    alert('Dataset creado exitosamente');
+                    // Redirigir al preview del dataset recién creado
+                    window.location.href = `dataset_preview.html?id=${datasetId}`;
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error al conectar con el servidor');
             }
         });
     });
-    </script>
+  </script>
 </body>
 </html>
