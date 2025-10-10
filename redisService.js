@@ -3,9 +3,10 @@ const redis = require('redis');
 // Configuración de Redis
 const redisClient = redis.createClient({
   socket: {
-    host: process.env.REDIS_HOST || '127.0.0.1',
+    host: process.env.REDIS_HOST || 'tec-bd.os.cr',
     port: process.env.REDIS_PORT || 6379
-  }
+  },
+  password: process.env.REDIS_PASSWORD || '1QAZ.0OKM2wsx'
 });
 
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
@@ -13,9 +14,8 @@ redisClient.on('error', (err) => console.log('Redis Client Error', err));
 // Conectar Redis
 const connectRedis = async () => {
   await redisClient.connect();
-  console.log('✅ Conectado a Redis');
+  console.log('Conectado a Redis');
 };
-
 
 // Servicio de Notificaciones
 const notificationService = {
