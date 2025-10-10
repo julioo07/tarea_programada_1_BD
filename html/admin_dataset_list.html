@@ -56,26 +56,8 @@
         <div class="friends-list" id="datasetsList"></div>
     </main>
     <script>
-        async function getNeo4jUserId() {
-            const token = localStorage.getItem('token');
-            if (!token) return null;
-            try {
-                const res = await fetch('http://localhost:4000/api/auth/me', {
-                headers: { Authorization: 'Bearer ' + token }
-                });
-                if (!res.ok) return null;
-                const data = await res.json();
-                return data.id; // Este es el id_usuario
-            } catch {
-                return null;
-            }
-        }
     async function cargarMisDatasets() {
-        const userId = await getNeo4jUserId();
-        if (!userId) {
-            document.getElementById('datasetsList').innerHTML = '<p>No se pudo obtener el usuario.</p>';
-            return;
-        }
+        const userId = localStorage.getItem('userId') || 'USR001'; // Usa el usuario real
         const res = await fetch(`http://localhost:2000/api/datasets/usuario/${userId}`);
         const datasets = await res.json();
         document.getElementById('datasetsList').innerHTML = datasets.map(ds => `
