@@ -14,7 +14,7 @@ redisClient.on('error', (err) => console.log('Redis Client Error', err));
 // Conectar Redis
 const connectRedis = async () => {
   await redisClient.connect();
-  console.log('Conectado a Redis');
+  console.log('Conectado a Redis');
 };
 
 // Servicio de Notificaciones
